@@ -1,0 +1,30 @@
+@startuml Sistema Bancario - Arquitectura
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Sistema Bancario - Arquitectura
+
+Person(usuario, "Usuario", "Usuario del sistema bancario")
+
+System_Boundary(sistema_bancario, "Sistema Bancario") {
+    Container(api_gateway, "API Gateway", "AWS API Gateway", "Punto de entrada para todas las operaciones")
+    Container(cognito, "Cognito", "AWS Cognito", "Autenticación y autorización")
+    Container(lambda, "Lambda", "AWS Lambda + Node.js", "Procesa las operaciones de empresas y miembros")
+    ContainerDb(rds, "Base de Datos", "PostgreSQL en RDS", "Almacena empresas, miembros y sus relaciones")
+    Container(eventbridge, "Event Bus", "AWS EventBridge", "Bus de eventos del dominio")
+    Container(event_processor, "Procesador de Eventos", "AWS Lambda", "Procesa eventos del dominio")
+}
+
+System_Ext(notificaciones, "Sistema de Notificaciones", "Envía emails y notificaciones")
+
+Rel(usuario, api_gateway, "Realiza operaciones", "HTTPS")
+Rel(api_gateway, cognito, "Valida tokens", "HTTPS")
+Rel(api_gateway, lambda, "Invoca", "HTTPS")
+Rel(lambda, rds, "CRUD", "PostgreSQL Protocol")
+Rel(lambda, eventbridge, "Publica eventos", "HTTPS")
+Rel(eventbridge, event_processor, "Procesa eventos", "HTTPS")
+Rel(event_processor, notificaciones, "Envía", "HTTPS")
+
+@enduml

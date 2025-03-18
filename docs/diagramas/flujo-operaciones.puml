@@ -1,0 +1,74 @@
+@startuml Flujo de Operaciones
+!theme plain
+skinparam backgroundColor white
+skinparam ArrowColor #062c33
+skinparam ActivityBorderColor #062c33
+skinparam ActivityBackgroundColor #ffffff
+
+title Flujo de Operaciones - Gestión de Empresas
+
+|Cliente|
+start
+:Envía solicitud HTTP;
+|API Gateway|
+:Valida token con Cognito;
+
+if (¿Token válido?) then (sí)
+  |Lambda|
+  fork
+    :Crear Empresa;
+    :Validar RUC;
+    :Validar Email;
+    :Validar Teléfono;
+    if (¿Datos válidos?) then (sí)
+      :Guardar en PostgreSQL;
+      :Publicar Evento;
+      :Retornar 201 Created;
+    else (no)
+      :Retornar 400 Bad Request;
+    endif
+  fork again
+    :Listar Empresas;
+    :Consultar PostgreSQL;
+    :Filtrar Activas;
+    :Retornar 200 OK;
+  fork again
+    :Obtener Empresa;
+    if (¿Existe?) then (sí)
+      :Retornar 200 OK;
+    else (no)
+      :Retornar 404 Not Found;
+    endif
+  fork again
+    :Actualizar Empresa;
+    if (¿Existe?) then (sí)
+      :Validar Datos;
+      if (¿Datos válidos?) then (sí)
+        :Actualizar en PostgreSQL;
+        :Publicar Evento;
+        :Retornar 200 OK;
+      else (no)
+        :Retornar 400 Bad Request;
+      endif
+    else (no)
+      :Retornar 404 Not Found;
+    endif
+  fork again
+    :Eliminar Empresa;
+    if (¿Existe?) then (sí)
+      :Marcar como Inactiva;
+      :Publicar Evento;
+      :Retornar 200 OK;
+    else (no)
+      :Retornar 404 Not Found;
+    endif
+  end fork
+  |Event Processor|
+  :Procesar Evento;
+  :Registrar en DynamoDB;
+else (no)
+  :Retornar 401 Unauthorized;
+endif
+
+stop
+@enduml

@@ -1,0 +1,68 @@
+@startuml Infraestructura AWS
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v16.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/General/Client.puml
+!include AWSPuml/SecurityIdentityCompliance/Cognito.puml
+!include AWSPuml/ApplicationIntegration/APIGateway.puml
+!include AWSPuml/Compute/Lambda.puml
+!include AWSPuml/Database/RDS.puml
+!include AWSPuml/Database/DynamoDB.puml
+!include AWSPuml/ApplicationIntegration/EventBridge.puml
+
+title Infraestructura AWS - Sistema Bancario
+
+skinparam component {
+    BackgroundColor White
+    BorderColor #062c33
+    ArrowColor #062c33
+}
+
+' Definición de la VPC
+rectangle "VPC (10.0.0.0/16)" {
+    rectangle "Subred Pública A\n10.0.1.0/24" {
+        Lambda(lambda_enterprises_a, "Lambda Empresas", "")
+    }
+    
+    rectangle "Subred Pública B\n10.0.2.0/24" {
+        Lambda(lambda_enterprises_b, "Lambda Empresas", "")
+        RDS(rds, "PostgreSQL", "")
+    }
+}
+
+' Componentes externos a la VPC
+Client(cliente, "Cliente", "")
+APIGateway(api_gateway, "API Gateway", "")
+Cognito(cognito, "Cognito", "")
+EventBridge(eventbridge, "EventBridge", "")
+Lambda(event_processor, "Event Processor", "")
+DynamoDB(dynamodb, "DynamoDB\nAuditoría", "")
+
+' Conexiones
+cliente --> api_gateway: "HTTPS"
+api_gateway --> cognito: "Autenticación"
+api_gateway --> lambda_enterprises_a: "Invocación"
+api_gateway --> lambda_enterprises_b: "Invocación"
+
+lambda_enterprises_a --> rds: "SQL/TLS"
+lambda_enterprises_b --> rds: "SQL/TLS"
+
+lambda_enterprises_a --> eventbridge: "Eventos"
+lambda_enterprises_b --> eventbridge: "Eventos"
+
+eventbridge --> event_processor: "Procesamiento"
+event_processor --> dynamodb: "Registro"
+
+note right of rds
+  Base de datos principal
+  - Tabla enterprises
+  - Validaciones
+  - Índices
+end note
+
+note right of dynamodb
+  Registro de auditoría
+  - Eventos de dominio
+  - Trazabilidad
+end note
+
+@enduml

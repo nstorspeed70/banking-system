@@ -1,0 +1,115 @@
+@startuml Pasos de Despliegue
+!theme plain
+skinparam backgroundColor white
+skinparam ArrowColor #062c33
+skinparam ActivityBorderColor #062c33
+skinparam ActivityBackgroundColor #ffffff
+skinparam ActivityDiamondBackgroundColor #ffffff
+skinparam NoteBackgroundColor #fff8dc
+skinparam NoteBorderColor #062c33
+
+title Pasos de Despliegue - Sistema Bancario
+
+|Preparación Local|
+start
+:1. Clonar Repositorio;
+:2. Instalar Dependencias;
+note right
+  npm install en:
+  - terraform/lambda/enterprises/
+end note
+
+|Configuración AWS|
+:3. Configurar AWS CLI;
+note right
+  aws configure:
+  - Access Key
+  - Secret Key
+  - Region: us-east-1
+end note
+
+|Terraform|
+:4. Inicializar Terraform;
+note right
+  cd terraform
+  terraform init
+end note
+
+|Base de Datos|
+:5. Configurar Variables;
+note right
+  Definir en terraform.tfvars:
+  - db_password
+  - ambiente
+  - proyecto
+end note
+
+|Despliegue|
+:6. Desplegar Infraestructura;
+note right
+  terraform apply
+  -var 'db_password=valor'
+end note
+
+|Verificación|
+:7. Validar Despliegue;
+fork
+  :Verificar API Gateway;
+  note right
+    Endpoints activos:
+    - /enterprises
+    - /enterprises/{id}
+  end note
+fork again
+  :Verificar Cognito;
+  note right
+    User Pool creado
+    y configurado
+  end note
+fork again
+  :Verificar Lambda;
+  note right
+    - enterprises
+    - event-processor
+  end note
+fork again
+  :Verificar RDS;
+  note right
+    PostgreSQL
+    accesible
+  end note
+end fork
+
+|Postman|
+:8. Importar Colección;
+:9. Configurar Variables;
+note right
+  En environment:
+  - apiUrl
+  - userPoolId
+  - clientId
+end note
+
+|Pruebas|
+:10. Ejecutar Pruebas;
+fork
+  :Crear Usuario;
+fork again
+  :Obtener Token;
+fork again
+  :Probar Endpoints;
+end fork
+
+|Monitoreo|
+:11. Verificar Logs;
+note right
+  CloudWatch:
+  - Lambda logs
+  - API Gateway logs
+end note
+
+|Listo|
+:Sistema en Producción;
+stop
+
+@enduml

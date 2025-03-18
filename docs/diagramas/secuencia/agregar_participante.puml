@@ -1,0 +1,45 @@
+@startuml agregar_participante
+title Agregar Participante - Flujo de Secuencia
+
+actor Cliente
+participant "API Gateway" as API
+participant "Lambda" as Lambda
+participant "RDS" as DB
+participant "EventBridge" as Events
+participant "DynamoDB" as Audit
+
+Cliente -> API: POST /enterprises/{id}/parties
+activate API
+
+API -> Lambda: Invoke handleCreateParty
+activate Lambda
+
+Lambda -> DB: Verificar empresa
+activate DB
+DB --> Lambda: Empresa existe
+deactivate DB
+
+Lambda -> Lambda: Validar datos participante
+
+Lambda -> DB: Insertar participante
+activate DB
+DB --> Lambda: Participante creado
+deactivate DB
+
+Lambda -> Events: Publicar PartyCreatedEvent
+activate Events
+Events --> Lambda: Evento publicado
+deactivate Events
+
+Lambda -> Audit: Registrar auditoría
+activate Audit
+Audit --> Lambda: Auditoría registrada
+deactivate Audit
+
+Lambda --> API: Respuesta exitosa
+deactivate Lambda
+
+API --> Cliente: 201 Created
+deactivate API
+
+@enduml

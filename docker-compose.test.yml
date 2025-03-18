@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db_test:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: sistema_bancario_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: DbMaster2025#Secure
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      DB_HOST: db_test
+      DB_PORT: 5432
+      DB_NAME: sistema_bancario_test
+      DB_USER: postgres
+      DB_PASSWORD: DbMaster2025#Secure
+      NODE_ENV: test
+    depends_on:
+      db_test:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: npm run test:integration

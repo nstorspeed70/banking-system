@@ -1,0 +1,398 @@
+{
+	"info": {
+		"_postman_id": "2a122f39-9795-41be-8e0c-305a31eaab3d",
+		"name": "Sistema Bancario API Copy",
+		"description": "API Collection for Banking System implementing CQRS and DDD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28860721"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Sign Up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-amz-json-1.1"
+							},
+							{
+								"key": "X-Amz-Target",
+								"value": "AWSCognitoIdentityProviderService.SignUp"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ClientId\": \"{{clientId}}\",\n    \"Username\": \"{{userEmail}}\",\n    \"Password\": \"{{userPassword}}\",\n    \"UserAttributes\": [\n        {\n            \"Name\": \"email\",\n            \"Value\": \"{{userEmail}}\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "https://cognito-idp.{{region}}.amazonaws.com",
+							"protocol": "https",
+							"host": [
+								"cognito-idp",
+								"{{region}}",
+								"amazonaws",
+								"com"
+							]
+						},
+						"description": "Register a new user in Cognito"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Amz-Target",
+								"value": "AWSCognitoIdentityProviderService.ConfirmSignUp"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-amz-json-1.1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ClientId\": \"175fmpiupionbq3jr74q8c88h7\",\n    \"Username\": \"nstorspeed70@gmail.com\",\n    \"ConfirmationCode\": \"098729\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://cognito-idp.us-east-1.amazonaws.com/",
+							"protocol": "https",
+							"host": [
+								"cognito-idp",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Generated from cURL: curl --location 'https://cognito-idp.us-east-1.amazonaws.com/' \\\n--header 'X-Amz-Target: AWSCognitoIdentityProviderService.ConfirmSignUp' \\\n--header 'Content-Type: application/x-amz-json-1.1' \\\n--data '{\n    \"ClientId\": \"175fmpiupionbq3jr74q8c88h7\",\n    \"Username\": \"nstorspeed70@gmail.com\",\n    \"ConfirmationCode\": \"CÓDIGO_RECIBIDO_POR_EMAIL\"\n}"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-amz-json-1.1"
+							},
+							{
+								"key": "X-Amz-Target",
+								"value": "AWSCognitoIdentityProviderService.InitiateAuth"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"AuthFlow\": \"USER_PASSWORD_AUTH\",\n    \"ClientId\": \"{{clientId}}\",\n    \"AuthParameters\": {\n        \"USERNAME\": \"{{userEmail}}\",\n        \"PASSWORD\": \"{{userPassword}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "https://cognito-idp.{{region}}.amazonaws.com",
+							"protocol": "https",
+							"host": [
+								"cognito-idp",
+								"{{region}}",
+								"amazonaws",
+								"com"
+							]
+						},
+						"description": "Get authentication token"
+					},
+					"response": []
+				}
+			],
+			"description": "AWS Cognito Authentication Endpoints"
+		},
+		{
+			"name": "Enterprises",
+			"item": [
+				{
+					"name": "Create Enterprise",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"taxId\": \"PE12345678901\",\n    \"legalBusinessName\": \"Empresa Ejemplo SRL\",\n    \"enterpriseType\": \"SRL\",\n    \"contactEmail\": \"contacto@ejemplo.com\",\n    \"contactPhone\": \"+51999888777\"\n}"
+						},
+						"url": {
+							"raw": "{{apiUrl}}/enterprises",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises"
+							]
+						},
+						"description": "Create a new enterprise"
+					},
+					"response": []
+				},
+				{
+					"name": "List Enterprises",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiUrl}}/enterprises",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises"
+							]
+						},
+						"description": "List all active enterprises"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Enterprise",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}"
+							]
+						},
+						"description": "Get enterprise details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Enterprise",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalBusinessName\": \"Empresa Ejemplo SAC\",\n    \"contactEmail\": \"nuevo@ejemplo.com\",\n    \"contactPhone\": \"+51999888666\"\n}"
+						},
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}"
+							]
+						},
+						"description": "Update enterprise details"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Enterprise",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}"
+							]
+						},
+						"description": "Soft delete an enterprise"
+					},
+					"response": []
+				}
+			],
+			"description": "Enterprise management endpoints following CQRS pattern"
+		},
+		{
+			"name": "Parties",
+			"item": [
+				{
+					"name": "Create Party",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"role\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}/parties",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}",
+								"parties"
+							]
+						},
+						"description": "Add a new party to an enterprise"
+					},
+					"response": []
+				},
+				{
+					"name": "List Enterprise Parties",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}/parties?page=1&limit=10&role=ADMIN",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}",
+								"parties"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "ADMIN"
+								}
+							]
+						},
+						"description": "List all parties of an enterprise with pagination and filtering"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Party",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John Doe Updated\",\n    \"email\": \"john.updated@example.com\",\n    \"role\": \"EMPLOYEE\"\n}"
+						},
+						"url": {
+							"raw": "{{apiUrl}}/enterprises/{{enterpriseId}}/parties/{{partyId}}",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"enterprises",
+								"{{enterpriseId}}",
+								"parties",
+								"{{partyId}}"
+							]
+						},
+						"description": "Update party information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Party Enterprises",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{idToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{apiUrl}}/parties/{{partyId}}/enterprises",
+							"host": [
+								"{{apiUrl}}"
+							],
+							"path": [
+								"parties",
+								"{{partyId}}",
+								"enterprises"
+							]
+						},
+						"description": "Get all enterprises associated with a party"
+					},
+					"response": []
+				}
+			],
+			"description": "Party management endpoints following CQRS pattern"
+		}
+	]
+}

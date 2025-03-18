@@ -1,0 +1,17 @@
+# Archivos de Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Archivos de variables sensibles
+*.tfvars
+*.tfvars.json
+
+# Logs
+*.log
+
+# Archivos de credenciales
+.aws/
+credentials
+config

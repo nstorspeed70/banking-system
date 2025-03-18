@@ -1,0 +1,143 @@
+@startuml Modelo de Dominio
+!theme plain
+skinparam backgroundColor white
+skinparam ArrowColor #062c33
+skinparam ClassBorderColor #062c33
+skinparam ClassBackgroundColor #ffffff
+
+title Modelo de Dominio - Sistema Bancario
+
+package "Agregado Empresa" {
+    class Enterprise <<AggregateRoot>> {
+        - id: UUID
+        - taxId: TaxId
+        - legalBusinessName: String
+        - enterpriseType: EnterpriseType
+        - contactEmail: Email
+        - contactPhone: PhoneNumber
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        - isActive: boolean
+        + create()
+        + update()
+        + delete()
+        + validate()
+    }
+
+    class TaxId <<ValueObject>> {
+        - value: String
+        + validate()
+    }
+
+    class Email <<ValueObject>> {
+        - value: String
+        + validate()
+    }
+
+    class PhoneNumber <<ValueObject>> {
+        - value: String
+        + validate()
+    }
+
+    enum EnterpriseType <<Enum>> {
+        SRL
+        SAC
+        SA
+    }
+}
+
+package "Agregado Miembro" {
+    class Party <<AggregateRoot>> {
+        - id: UUID
+        - name: String
+        - email: Email
+        - role: PartyRole
+        - enterpriseId: UUID
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        - isActive: boolean
+        + create()
+        + update()
+        + delete()
+        + validate()
+    }
+
+    enum PartyRole <<Enum>> {
+        ADMIN
+        EMPLOYEE
+        READ_ONLY
+    }
+}
+
+package "Eventos de Dominio" {
+    class EnterpriseCreated <<DomainEvent>> {
+        - enterpriseId: UUID
+        - timestamp: DateTime
+        - data: EnterpriseData
+    }
+
+    class EnterpriseUpdated <<DomainEvent>> {
+        - enterpriseId: UUID
+        - timestamp: DateTime
+        - changes: Changes
+    }
+
+    class EnterpriseDeleted <<DomainEvent>> {
+        - enterpriseId: UUID
+        - timestamp: DateTime
+    }
+
+    class PartyCreated <<DomainEvent>> {
+        - partyId: UUID
+        - enterpriseId: UUID
+        - timestamp: DateTime
+        - data: PartyData
+    }
+
+    class PartyUpdated <<DomainEvent>> {
+        - partyId: UUID
+        - enterpriseId: UUID
+        - timestamp: DateTime
+        - changes: Changes
+    }
+}
+
+package "Repositorios" {
+    interface IEnterpriseRepository {
+        + create(enterprise: Enterprise)
+        + findById(id: UUID)
+        + findByTaxId(taxId: TaxId)
+        + update(enterprise: Enterprise)
+        + delete(id: UUID)
+    }
+
+    interface IPartyRepository {
+        + create(party: Party)
+        + findById(id: UUID)
+        + findByEmail(email: Email)
+        + findByEnterpriseId(enterpriseId: UUID)
+        + update(party: Party)
+        + delete(id: UUID)
+    }
+}
+
+Enterprise --> TaxId
+Enterprise --> Email
+Enterprise --> PhoneNumber
+Enterprise --> EnterpriseType
+
+Party --> Email
+Party --> PartyRole
+Party --> Enterprise: pertenece a
+
+Enterprise ..> EnterpriseCreated: publica
+Enterprise ..> EnterpriseUpdated: publica
+Enterprise ..> EnterpriseDeleted: publica
+
+Party ..> PartyCreated: publica
+Party ..> PartyUpdated: publica
+
+IEnterpriseRepository ..> Enterprise: gestiona
+IPartyRepository ..> Party: gestiona
+
+@enduml

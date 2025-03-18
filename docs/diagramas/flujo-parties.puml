@@ -1,0 +1,96 @@
+@startuml Flujo de Operaciones - Miembros
+!theme plain
+skinparam backgroundColor white
+skinparam ArrowColor #062c33
+skinparam ActivityBorderColor #062c33
+skinparam ActivityBackgroundColor #ffffff
+
+title Flujo de Operaciones - Gestión de Miembros
+
+|API Gateway|
+start
+:Recibir petición HTTP;
+:Validar token JWT;
+
+|Lambda|
+if (¿Operación válida?) then (sí)
+  fork
+    |Crear Miembro|
+    :Validar datos de entrada;
+    if (¿Datos válidos?) then (sí)
+      :Verificar empresa existente;
+      if (¿Empresa existe?) then (sí)
+        :Verificar email único;
+        if (¿Email disponible?) then (sí)
+          :Crear miembro;
+          :Publicar PartyCreatedEvent;
+          :Retornar 201 Created;
+        else (no)
+          :Retornar 400 Bad Request;
+        endif
+      else (no)
+        :Retornar 404 Not Found;
+      endif
+    else (no)
+      :Retornar 400 Bad Request;
+    endif
+    
+    |Actualizar Miembro|
+    :Validar datos de actualización;
+    if (¿Datos válidos?) then (sí)
+      :Verificar miembro existente;
+      if (¿Miembro existe?) then (sí)
+        :Verificar pertenencia a empresa;
+        if (¿Pertenece?) then (sí)
+          if (¿Email cambia?) then (sí)
+            :Verificar nuevo email único;
+            if (¿Email disponible?) then (sí)
+              :Actualizar miembro;
+              :Publicar PartyUpdatedEvent;
+              :Retornar 200 OK;
+            else (no)
+              :Retornar 400 Bad Request;
+            endif
+          else (no)
+            :Actualizar miembro;
+            :Publicar PartyUpdatedEvent;
+            :Retornar 200 OK;
+          endif
+        else (no)
+          :Retornar 404 Not Found;
+        endif
+      else (no)
+        :Retornar 404 Not Found;
+      endif
+    else (no)
+      :Retornar 400 Bad Request;
+    endif
+
+    |Listar Miembros|
+    :Validar parámetros de consulta;
+    if (¿Parámetros válidos?) then (sí)
+      :Verificar empresa existente;
+      if (¿Empresa existe?) then (sí)
+        :Aplicar filtros;
+        :Paginar resultados;
+        :Retornar 200 OK;
+      else (no)
+        :Retornar 404 Not Found;
+      endif
+    else (no)
+      :Retornar 400 Bad Request;
+    endif
+  end fork
+else (no)
+  :Retornar 405 Method Not Allowed;
+endif
+
+|EventBridge|
+:Procesar eventos de dominio;
+
+|Notificaciones|
+:Enviar notificaciones;
+
+stop
+
+@enduml

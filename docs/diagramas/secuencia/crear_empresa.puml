@@ -1,0 +1,44 @@
+@startuml crear_empresa
+title Crear Empresa - Flujo de Secuencia
+
+actor Cliente
+participant "API Gateway" as API
+participant "Lambda" as Lambda
+participant "RDS" as DB
+participant "EventBridge" as Events
+participant "DynamoDB" as Audit
+
+Cliente -> API: POST /enterprises
+activate API
+
+API -> Lambda: Invoke handleCreateEnterprise
+activate Lambda
+
+Lambda -> Lambda: Validar datos
+Lambda -> DB: Verificar duplicados
+activate DB
+DB --> Lambda: No hay duplicados
+deactivate DB
+
+Lambda -> DB: Insertar empresa
+activate DB
+DB --> Lambda: Empresa creada
+deactivate DB
+
+Lambda -> Events: Publicar EnterpriseCreatedEvent
+activate Events
+Events --> Lambda: Evento publicado
+deactivate Events
+
+Lambda -> Audit: Registrar auditoría
+activate Audit
+Audit --> Lambda: Auditoría registrada
+deactivate Audit
+
+Lambda --> API: Respuesta exitosa
+deactivate Lambda
+
+API --> Cliente: 201 Created
+deactivate API
+
+@enduml
