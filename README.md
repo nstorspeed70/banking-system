@@ -118,9 +118,10 @@ cd terraform && terraform apply -auto-approve
 ### Arquitectura del Sistema
 ![Arquitectura del Sistema](docs/diagramas/arquitectura.png)
 
-### Flujos Principales
-- [Crear Empresa](docs/diagramas/secuencia/crear_empresa.puml)
-- [Agregar Participante](docs/diagramas/secuencia/agregar_participante.puml)
+### Diagramas
+![Pasos de despliegue](docs/diagramas/PasosdeDespliegue.png)
+![Infraestructura](docs/diagramas/infraestructuraAWS.png)
+
 
 ## 🔍 Monitoreo y Métricas
 

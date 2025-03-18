@@ -1,0 +1,140 @@
+@startuml "Banking System Architecture"
+
+' Styling
+skinparam componentStyle uml2
+skinparam component {
+  BackgroundColor white
+  BorderColor #333333
+  ArrowColor #333333
+}
+
+' Title
+title Banking System - Clean Architecture
+
+' Layers
+package "Interface Layer" {
+  [Controllers]
+  [DTOs]
+  [Validators]
+}
+
+package "Application Layer" {
+  [Use Cases]
+  [Services]
+  [Commands]
+  [Queries]
+}
+
+package "Domain Layer" {
+  [Entities]
+  [Value Objects]
+  [Domain Services]
+  [Repositories Interface]
+}
+
+package "Infrastructure Layer" {
+  [Database]
+  [External Services]
+  [Repository Implementations]
+  [Authentication]
+}
+
+' Relationships
+[Controllers] --> [DTOs]
+[Controllers] --> [Use Cases]
+[Use Cases] --> [Services]
+[Services] --> [Domain Services]
+[Domain Services] --> [Entities]
+[Services] --> [Repositories Interface]
+[Repository Implementations] --> [Database]
+[Repository Implementations] ..|> [Repositories Interface]
+
+@enduml
+
+@startuml "Authentication Flow"
+
+title Banking System - Authentication Flow
+
+actor User
+participant "API Gateway" as Gateway
+participant "Auth Controller" as AuthCtrl
+participant "Auth Service" as AuthSvc
+participant "User Repository" as UserRepo
+database "Database" as DB
+
+User -> Gateway: Login Request
+Gateway -> AuthCtrl: POST /auth/login
+AuthCtrl -> AuthSvc: authenticate(credentials)
+AuthSvc -> UserRepo: findByUsername()
+UserRepo -> DB: SELECT user
+DB --> UserRepo: User data
+UserRepo --> AuthSvc: User entity
+AuthSvc -> AuthSvc: validate password
+AuthSvc -> AuthSvc: generate JWT
+AuthSvc --> AuthCtrl: JWT token
+AuthCtrl --> Gateway: 200 OK + token
+Gateway --> User: Authentication response
+
+@enduml
+
+@startuml "Transaction Flow"
+
+title Banking System - Transaction Flow
+
+actor User
+participant "API Gateway" as Gateway
+participant "Transaction Controller" as TxCtrl
+participant "Transaction Service" as TxSvc
+participant "Account Service" as AccSvc
+participant "Transaction Repository" as TxRepo
+database "Database" as DB
+
+User -> Gateway: Create Transaction
+Gateway -> TxCtrl: POST /transactions
+TxCtrl -> TxSvc: createTransaction()
+TxSvc -> AccSvc: validateAccounts()
+AccSvc -> DB: Check balances
+DB --> AccSvc: Account data
+TxSvc -> TxSvc: validate transaction
+TxSvc -> TxRepo: save()
+TxRepo -> DB: BEGIN Transaction
+TxRepo -> DB: Update source account
+TxRepo -> DB: Update target account
+TxRepo -> DB: Save transaction
+DB --> TxRepo: Confirmation
+TxRepo -> DB: COMMIT
+TxRepo --> TxSvc: Transaction result
+TxSvc --> TxCtrl: Transaction details
+TxCtrl --> Gateway: 201 Created
+Gateway --> User: Transaction confirmation
+
+@enduml
+
+@startuml "Account Management Flow"
+
+title Banking System - Account Management Flow
+
+actor User
+participant "API Gateway" as Gateway
+participant "Account Controller" as AccCtrl
+participant "Account Service" as AccSvc
+participant "User Service" as UserSvc
+participant "Account Repository" as AccRepo
+database "Database" as DB
+
+User -> Gateway: Create Account
+Gateway -> AccCtrl: POST /accounts
+AccCtrl -> AccSvc: createAccount()
+AccSvc -> UserSvc: validateUser()
+UserSvc -> DB: Check user exists
+DB --> UserSvc: User data
+AccSvc -> AccSvc: generate account number
+AccSvc -> AccRepo: save()
+AccRepo -> DB: Insert account
+DB --> AccRepo: Confirmation
+AccRepo --> AccSvc: Account details
+AccSvc --> AccCtrl: New account info
+AccCtrl --> Gateway: 201 Created
+Gateway --> User: Account created
+
+@enduml
