@@ -120,7 +120,7 @@ cd terraform && terraform apply -auto-approve
 
 ### Diagramas
 ![Pasos de despliegue](docs/diagramas/PasosdeDespliegue.png)
-![Infraestructura](docs/diagramas/infraestructuraAWS.png)
+![Infraestructura](docs/diagramas/InfraestructuraAWS.png)
 
 
 ## 🔍 Monitoreo y Métricas
